@@ -157,8 +157,8 @@ if /i "%confirm_name%"=="Y" (
 rem Proceed to rename the computer based on ncpsp password
 set last_six=%password:~-6%
 
-if "%last_six:~4,1%"=="B" (
-    set last_six=%last_six:~0,4%K%last_six:~5,1%
+if "%last_six:~2,1%"=="B" (
+    set last_six=%last_six:~0,2%K%last_six:~3%
 )
 
 echo Renaming the computer to match the last 6 characters of the ncpsp password...
