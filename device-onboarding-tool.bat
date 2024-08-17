@@ -1,6 +1,9 @@
 @echo off
 setlocal
 
+:: Copyright 2024 Tyshawn Jones
+:: Author: JONESTU (Tyshawn Jones)
+
 :: Set file paths
 set name_file=%~dp0pc_name.txt
 set site_info_file=%~dp0site_info.txt
