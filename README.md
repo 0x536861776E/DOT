@@ -2,6 +2,12 @@
 
 The **Device Onboarding Tool (DOT)** is a custom-built, portable provisioning solution for the onboarding of desktops and laptops intended for use at Agilent Solutions Incorporated (ASI) sites, including those within the New York City Department of Education (NYCDOE). This tool automates the configuration and setup of devices during the initial system setup, ensuring they are ready for deployment. It is designed to streamline the process, reducing the time and effort required while ensuring consistency across devices.
 
+## Demonstration
+
+![GIF showing usage of the tool](https://github.com/JONESTU/DOT/blob/main/demo.gif?raw=true)
+
+*This GIF demonstrates how to run DOT during the initial setup of a Windows 11 system.*
+
 ## Motivation
 
 This project was developed to address the need for a more efficient and error-free process of device onboarding within ASI and NYCDOE. Traditionally, onboarding devices has been a manual, time-consuming process prone to errors. By automating this process, DOT reduces the manual work involved, ensuring devices are consistently set up according to organizational standards.
@@ -17,12 +23,6 @@ The following technologies were used in this project:
 - **Operating System:** Windows 11
 - **Programming Language:** Windows Batch Script
 - **System Tools:** WMIC, Net Session
-
-## Demonstration
-
-![GIF showing usage of the tool](https://github.com/JONESTU/DOT/blob/main/demo.gif?raw=true)
-
-*This GIF demonstrates how to run DOT during the initial setup of a Windows 11 system.*
 
 ## Features
 
