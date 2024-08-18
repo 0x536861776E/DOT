@@ -5,8 +5,7 @@ setlocal
 :: Author: JONESTU (Tyshawn Jones)
 
 :: Set file paths
-set name_file=%~dp0pc_name.txt
-set site_info_file=%~dp0site_info.txt
+set name_file="%~dp0pc_name.txt"
 
 :: Ensure script is run as Administrator
 net session >nul 2>&1
@@ -25,19 +24,25 @@ set /p choice=Enter your choice (1 or 2):
 if "%choice%"=="1" (
     set network_name=ncpsp
     set network_hex=6e63707370
+    echo [DEBUG] ncpsp selected
 ) else if "%choice%"=="2" (
     set network_name=DOEGuest
     set network_hex=444F454775657374
+    echo [DEBUG] DOEGuest selected
 ) else (
     echo Invalid choice. Please select 1 or 2.
     goto choose_network
 )
 
 :find_existing_xml
+rem Initialize found_file to ensure it starts empty
+set found_file=
 rem Check for existing .xml files for the selected network on the USB drives
-
 for %%d in (C D E F G H I J K L M N O P Q R S T U V W X Y Z) do (
-    if exist %%d:\%network_name%.xml set found_file=%%d:\%network_name%.xml
+    if exist "%%d:\%network_name%.xml" (
+        set found_file=%%d:\%network_name%.xml
+        echo [DEBUG] Found XML: %%d:\%network_name%.xml
+    )
 )
 
 if defined found_file (
@@ -45,22 +50,8 @@ if defined found_file (
     set xml_path=%found_file%
     goto confirm_connection
 ) else (
+    echo [DEBUG] No XML file found, proceeding to ask for password
     goto ask_password
-)
-
-:confirm_connection
-echo Do you want to use the existing XML file to connect to %network_name%?
-echo 1. Yes
-echo 2. No
-set /p connect_choice=Enter your choice (1 or 2): 
-
-if "%connect_choice%"=="1" (
-    goto install_profile
-) else if "%connect_choice%"=="2" (
-    goto ask_password
-) else (
-    echo Invalid choice. Please select 1 or 2.
-    goto confirm_connection
 )
 
 :ask_password
@@ -71,13 +62,19 @@ if "%network_name%"=="ncpsp" if not exist "%name_file%" goto rename_computer
 
 :list_usb_drives
 echo Available USB drives:
+wmic logicaldisk where "drivetype=2" get deviceid, volumename, description | find /i "Removable" >nul
+if %errorlevel% neq 0 (
+    echo No USB drives detected. Please insert a USB drive and run the script again.
+    pause
+    exit /b
+)
+
 wmic logicaldisk where "drivetype=2" get deviceid, volumename, description
-echo.
 
 :ask_drive
 set /p drive_letter=Enter the USB drive letter (e.g., E): 
 set drive_letter=%drive_letter:~0,1%
-if not exist %drive_letter%:\ (
+if not exist "%drive_letter%:\" (
     echo Drive %drive_letter% does not exist. Please enter a valid drive letter.
     goto ask_drive
 )
@@ -116,7 +113,13 @@ echo     ^</MacRandomization^>
 echo ^</WLANProfile^>
 ) > "%xml_path%"
 
-echo XML file "%network_name%.xml" has been created successfully on drive %drive_letter%.
+if exist "%xml_path%" (
+    echo XML file "%network_name%.xml" has been created successfully on drive %drive_letter%.
+) else (
+    echo [ERROR] Failed to create XML file.
+    pause
+    exit /b
+)
 
 goto install_profile
 
@@ -141,19 +144,20 @@ if /i "%connected_ssid%"=="%network_name%" (
 )
 
 pause
-goto end
 
 :check_existing_name
-set /p current_name=<"%name_file%"
-echo The current computer name is %current_name%.
-set /p confirm_name=Is this name correct? (Y/N): 
-if /i "%confirm_name%"=="Y" (
-    echo Name confirmed. Proceeding with network connection...
-    goto list_usb_drives
-) else (
-    echo Name rejected. Proceeding with renaming process...
-    del "%name_file%" 2>nul
-    goto rename_computer
+if exist "%name_file%" (
+    set /p current_name=<"%name_file%"
+    echo The current computer name is %current_name%.
+    set /p confirm_name=Is this name correct? (Y/N): 
+    if /i "%confirm_name%"=="Y" (
+        echo Name confirmed. Proceeding with network connection...
+        goto install_profile
+    ) else (
+        echo Name rejected. Proceeding with renaming process...
+        del "%name_file%" 2>nul
+        goto rename_computer
+    )
 )
 
 :rename_computer
@@ -164,10 +168,17 @@ if "%last_six:~2,1%"=="B" (
     set last_six=%last_six:~0,2%K%last_six:~3%
 )
 
+set new_name=%last_six%
 echo Renaming the computer to match the last 6 characters of the ncpsp password...
-WMIC ComputerSystem where Name="%ComputerName%" call Rename Name="%last_six%-%~1"
-echo %last_six% > "%name_file%"
-echo Computer successfully renamed to "%last_six%-%~1"
+WMIC ComputerSystem where Name="%ComputerName%" call Rename Name="%new_name%" >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Failed to rename the computer.
+    pause
+    goto end
+)
+echo %new_name% > "%name_file%"
+echo Computer successfully renamed to "%new_name%".
+
 goto list_usb_drives
 
 :end
