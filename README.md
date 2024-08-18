@@ -38,11 +38,11 @@ Follow these steps to set up and use the Device Onboarding Tool:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/device-onboarding-tool.git
+   git clone https://github.com/JONESTU/DOT.git
    ```
 2. Navigate to the directory of the cloned repository:
    ```bash
-   cd device-onboarding-tool
+   cd DOT
    ```
 3. Transfer the program to the root of your USB drive:
    - Copy the main program file(s) from the cloned directory to the root of your USB drive.
