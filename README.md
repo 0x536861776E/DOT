@@ -61,6 +61,16 @@ Follow these steps to set up and use the Device Onboarding Tool:
 6. Right-click on the program file and select "Run as administrator."
 7. Follow the prompts provided by the tool to complete the onboarding process.
 
+### 3. Post-Onboarding Cleanup
+
+1. Delete Generated Files:
+   - After completing the onboarding process, delete the following files from the USB drive to ensure that they do not interfere with the onboarding process at the next site:
+     - `network.xml`: Contains the network configuration details.
+     - `ssid.txt`: Stores the selected network SSID.
+     - `pc_name.txt`: Stores the newly assigned computer name.
+   
+2. Prepare for the Next Site:
+   - Ensure that only the original program files remain on the USB drive before using it at a new site. This step is crucial to prevent any potential issues or conflicts during the onboarding process at different locations.
 ## License
 
 This project is licensed under the [Apache License 2.0](https://github.com/JONESTU/DOT/blob/main/LICENSE).
