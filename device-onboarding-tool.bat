@@ -5,75 +5,81 @@ setlocal
 :: Author: JONESTU (Tyshawn Jones)
 
 :: Define file paths
-set "xml_file=%~dp0network.xml"
-set "ssid_file=%~dp0ssid.txt"
+set "xml_file=%~dp0ncpspnetwork.xml"
 set "name_file=%~dp0pc_name.txt"
+set "skip_file=%~dp0skip_network.txt"
 
-:: Auto-run if essential files exist
-if exist %xml_file% if exist %name_file% if exist %ssid_file% (
-    set /p "network_name=" < %ssid_file%
+:: Check if name and skip files exist to determine next action
+if exist %name_file% (
     set /p "new_name=" < %name_file%
-    goto rename_and_connect
+    if exist %skip_file% (
+        goto rename_only
+    ) else if exist %xml_file% (
+        goto rename_and_connect
+    )
 )
 
-:network_selection
-set /p choice=Select the network (1=ncpsp, 2=DOEGuest): 
-if "%choice%"=="1" (
-    set "network_name=ncpsp"
-    set "network_hex=6e63707370"
-) else if "%choice%"=="2" (
-    set "network_name=DOEGuest"
-    set "network_hex=444F454775657374"
-) else (
-    echo Invalid choice. Please try again.
-    goto :network_selection
-)
-echo %network_name% > %ssid_file%
-
-set /p password=Enter the network password: 
-
-:: Prompt for PC name
-set /p "new_name=Enter the new computer name: "
+:: Retrieve computer serial number and create PC name
+for /f "tokens=2 delims==" %%i in ('wmic bios get serialnumber /value') do set "serial=%%i"
+set /p "school_name=Enter the school name: "
+set "new_name=%school_name%-%serial%"
 echo %new_name% > %name_file%
 
-:: Create the XML profile file if not found
-> %xml_file% (
-    echo ^<?xml version="1.0"?^>
-    echo ^<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1"^>
-    echo     ^<name^>%network_name%^</name^>
-    echo     ^<SSIDConfig^>
-    echo         ^<SSID^>
-    echo             ^<hex^>%network_hex%^</hex^>
-    echo             ^<name^>%network_name%^</name^>
-    echo         ^</SSID^>
-    echo     ^</SSIDConfig^>
-    echo     ^<connectionType^>ESS^</connectionType^>
-    echo     ^<connectionMode^>auto^</connectionMode^>
-    echo     ^<MSM^>
-    echo         ^<security^>
-    echo             ^<authEncryption^>
-    echo                 ^<authentication^>WPA2PSK^</authentication^>
-    echo                 ^<encryption^>AES^</encryption^>
-    echo                 ^<useOneX^>false^</useOneX^>
-    echo             ^</authEncryption^>
-    echo             ^<sharedKey^>
-    echo                 ^<keyType^>passPhrase^</keyType^>
-    echo                 ^<protected^>false^</protected^>
-    echo                 ^<keyMaterial^>%password%^</keyMaterial^>
-    echo             ^</sharedKey^>
-    echo         ^</security^>
-    echo     ^</MSM^>
-    echo     ^<MacRandomization xmlns="http://www.microsoft.com/networking/WLAN/profile/v3"^>
-    echo         ^<enableRandomization^>false^</enableRandomization^>
-    echo     ^</MacRandomization^>
-    echo ^</WLANProfile^>
+:: Ask if user wants to connect to ncpsp network
+set /p "connect_choice=Do you want to connect to ncpsp network? (y/n): "
+
+if /i "%connect_choice%"=="y" (
+    set /p password=Enter the ncpsp network password: 
+    > %xml_file% (
+        echo ^<?xml version="1.0"?^>
+        echo ^<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1"^>
+        echo     ^<name^>ncpsp^</name^>
+        echo     ^<SSIDConfig^>
+        echo         ^<SSID^>
+        echo             ^<hex^>6e63707370^</hex^>
+        echo             ^<name^>ncpsp^</name^>
+        echo         ^</SSID^>
+        echo     ^</SSIDConfig^>
+        echo     ^<connectionType^>ESS^</connectionType^>
+        echo     ^<connectionMode^>auto^</connectionMode^>
+        echo     ^<MSM^>
+        echo         ^<security^>
+        echo             ^<authEncryption^>
+        echo                 ^<authentication^>WPA2PSK^</authentication^>
+        echo                 ^<encryption^>AES^</encryption^>
+        echo                 ^<useOneX^>false^</useOneX^>
+        echo             ^</authEncryption^>
+        echo             ^<sharedKey^>
+        echo                 ^<keyType^>passPhrase^</keyType^>
+        echo                 ^<protected^>false^</protected^>
+        echo                 ^<keyMaterial^>%password%^</keyMaterial^>
+        echo             ^</sharedKey^>
+        echo         ^</security^>
+        echo     ^</MSM^>
+        echo     ^<MacRandomization xmlns="http://www.microsoft.com/networking/WLAN/profile/v3"^>
+        echo         ^<enableRandomization^>false^</enableRandomization^>
+        echo     ^</MacRandomization^>
+        echo ^</WLANProfile^>
+    )
+    goto rename_and_connect
+) else (
+    type NUL > %skip_file%
+    goto rename_only
 )
 
+:: Rename computer and connect to the ncpsp network
 :rename_and_connect
-:: Rename the computer
-wmic computersystem where name="%computername%" call rename name="%new_name%" >nul 2>&1
+netsh wlan add profile filename=%xml_file% interface="Wi-Fi"
+wmic computersystem where name="%computername%" call rename name="%new_name%" > NUL 2>&1
+netsh wlan connect name="ncpsp" ssid="ncpsp" interface="Wi-Fi"
+goto end
 
-:: Add network profile and connect
-netsh wlan add profile filename=%xml_file% user=current
-netsh wlan connect name=%network_name%
+:: Rename computer only (no network configuration)
+:rename_only
+wmic computersystem where name="%computername%" call rename name="%new_name%" > NUL 2>&1
+goto end
+
+:end
+echo "Computer renamed to %new_name%."
 pause
+exit /b
