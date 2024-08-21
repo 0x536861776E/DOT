@@ -65,12 +65,13 @@ Follow these steps to set up and use the Device Onboarding Tool:
 
 1. Delete Generated Files:
    - After completing the onboarding process, delete the following files from the USB drive to ensure that they do not interfere with the onboarding process at the next site:
-     - `network.xml`: Contains the network configuration details.
-     - `ssid.txt`: Stores the selected network SSID.
+     - `ncpspnetwork.xml`: Contains the ncpsp network configuration details.
+     - `skip_network.txt`: Indicates that the user opted out of connecting to the ncpsp network.
      - `pc_name.txt`: Stores the newly assigned computer name.
-   
+
 2. Prepare for the Next Site:
    - Ensure that only the original program files remain on the USB drive before using it at a new site. This step is crucial to prevent any potential issues or conflicts during the onboarding process at different locations.
+
 ## License
 
 This project is licensed under the [Apache License 2.0](https://github.com/JONESTU/DOT/blob/main/LICENSE).
