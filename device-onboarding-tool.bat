@@ -74,7 +74,7 @@ wmic computersystem where name="%computername%" call rename name="%new_name%" > 
 netsh wlan connect name="ncpsp" ssid="ncpsp" interface="Wi-Fi"
 goto end
 
-:: Rename computer only (no network configuration)
+:: Rename computer only
 :rename_only
 wmic computersystem where name="%computername%" call rename name="%new_name%" > NUL 2>&1
 goto end
