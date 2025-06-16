@@ -1,8 +1,8 @@
 @echo off
 setlocal
 
-:: Copyright 2024 Tyshawn Jones
-:: Author: JONESTU (Tyshawn Jones)
+:: Copyright 2024-2025 Tyshawn Jones
+:: Author: 0x536861776E (Shawn Jones)
 
 :: Define file paths
 set "xml_file=%~dp0ncpspnetwork.xml"
